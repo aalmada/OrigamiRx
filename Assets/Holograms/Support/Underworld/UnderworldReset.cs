@@ -1,23 +1,30 @@
-﻿using UnityEngine;
+﻿using UniRx;
+using UnityEngine;
 
-public class UnderworldReset : MonoBehaviour
+public class UnderworldReset 
+    : MonoBehaviour
 {
-    void OnReset()
+    void Start()
     {
-        // Show the stage and hide the underworld.
-        // Grab all of the script files from this GameObject's parent
-        MonoBehaviour[] behaviours = transform.parent.gameObject.GetComponentsInChildren<MonoBehaviour>(true);
-        foreach (var behaviour in behaviours)
-        {
-            // If the script's GameObject is disabled, enable it
-            if (!behaviour.gameObject.activeSelf)
+        MessageBroker.Default.Receive<ResetWorldArgs>()
+            .Subscribe(_ =>
             {
-                behaviour.gameObject.SetActive(true);
-            }
-        }
-        gameObject.SetActive(false);
+                // Show the stage and hide the underworld.
+                // Grab all of the script files from this GameObject's parent
+                var behaviours = transform.parent.gameObject.GetComponentsInChildren<MonoBehaviour>(true);
+                foreach (var behaviour in behaviours)
+                {
+                    // If the script's GameObject is disabled, enable it
+                    if (!behaviour.gameObject.activeSelf)
+                    {
+                        behaviour.gameObject.SetActive(true);
+                    }
+                }
+                gameObject.SetActive(false);
 
-        // Enable Spatial Mapping again.
-        SpatialMapping.Instance.MappingEnabled = true;
+                // Enable Spatial Mapping again.
+                SpatialMapping.Instance.MappingEnabled = true;
+            })
+            .AddTo(this);
     }
 }

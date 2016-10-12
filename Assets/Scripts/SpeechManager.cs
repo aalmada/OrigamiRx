@@ -5,6 +5,11 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
 
+public struct ResetWorldArgs
+{
+    // empty
+}
+
 public class SpeechManager 
     : MonoBehaviour
 {
@@ -15,8 +20,8 @@ public class SpeechManager
 
         keywords.Add("Reset world", () =>
         {
-            // Call the OnReset method on every descendant object.
-            this.BroadcastMessage("OnReset");
+            // Publish a reset world message.
+            MessageBroker.Default.Publish(new ResetWorldArgs());
         });
 
         keywords.Add("Drop Sphere", () =>
