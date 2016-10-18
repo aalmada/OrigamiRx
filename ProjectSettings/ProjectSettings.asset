@@ -445,7 +445,7 @@ PlayerSettings:
   metroCertificatePassword: 
   metroCertificateSubject: Holographic Academy
   metroCertificateIssuer: Holographic Academy
-  metroCertificateNotAfter: 80ea9648f95bd201
+  metroCertificateNotAfter: 004e34d76a43d301
   metroApplicationDescription: Test
   wsaImages:
     65636: 
@@ -470,7 +470,8 @@ PlayerSettings:
       CodeGeneration: False
       EnterpriseAuthentication: False
       HumanInterfaceDevice: False
-      InternetClient: False
+      InputInjectionBrokered: False
+      InternetClient: True
       InternetClientServer: False
       Location: False
       Microphone: True

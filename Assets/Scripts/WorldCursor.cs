@@ -8,33 +8,21 @@ public class WorldCursor
     // Use this for initialization
     void Start()
     {
-        var raycast = this.UpdateAsObservable()
-            .Select<Unit, RaycastHit?>(_ =>
-            {
-                // Do a raycast into the world based on the user's
-                // head position and orientation.
-                var headPosition = Camera.main.transform.position;
-                var gazeDirection = Camera.main.transform.forward;
-
-                RaycastHit hitInfo;
-                if (Physics.Raycast(headPosition, gazeDirection, out hitInfo))
-                    return hitInfo;
-
-                return null;
-            });
-
         // Grab the mesh renderer that's on the same object as this script.
         var meshRenderer = this.gameObject.GetComponentInChildren<MeshRenderer>();
 
-        // display cursor when raycast has value
-        raycast
+        // display cursor when gazing at something
+        this.GazeHitAsObservable()
             .Select(hitInfo => hitInfo.HasValue)
             .DistinctUntilChanged()
-            .Subscribe(hasValue => meshRenderer.enabled = hasValue)
+            .Subscribe(gazing =>
+            {
+                meshRenderer.enabled = gazing;
+            })
             .AddTo(this);
 
-        // move cursor when raycast has value
-        raycast
+        // move cursor when gazing at something
+        this.GazeHitAsObservable()
             .Where(hitInfo => hitInfo.HasValue)
             .Select(hitInfo => hitInfo.Value)
             .Subscribe(hitInfo => {

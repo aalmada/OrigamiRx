@@ -26,12 +26,12 @@ public class SpeechManager
 
         keywords.Add("Drop Sphere", () =>
         {
-            var focusObject = GazeGestureManager.Instance.FocusedObject;
-            if (focusObject != null)
-            {
-                // Call the OnDrop method on just the focused object.
-                focusObject.SendMessage("OnDrop");
-            }
+            //var focusObject = GazeGestureManager.Instance.FocusedObject;
+            //if (focusObject != null)
+            //{
+            //    // Call the OnDrop method on just the focused object.
+            //    focusObject.SendMessage("OnDrop");
+            //}
         });
 
         // Tell the KeywordRecognizer about our keywords.
