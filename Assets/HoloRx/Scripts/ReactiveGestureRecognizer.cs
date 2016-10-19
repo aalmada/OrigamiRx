@@ -58,7 +58,13 @@ public class ReactiveGestureRecognizer
     readonly IObservable<CumulativeDeltaGestureArgs> manipulationCompleted;
     readonly IObservable<CumulativeDeltaGestureArgs> manipulationStarted;
     readonly IObservable<CumulativeDeltaGestureArgs> manipulationUpdated;
-    readonly IObservable<TapppedGestureArgs> gestureTapped;
+    readonly IObservable<NormalizedOffsetGestureArgs> navigationCanceled;
+    readonly IObservable<NormalizedOffsetGestureArgs> navigationCompleted;
+    readonly IObservable<NormalizedOffsetGestureArgs> navigationStarted;
+    readonly IObservable<NormalizedOffsetGestureArgs> navigationUpdated;
+    readonly IObservable<GestureArgs> recognitionEnded;
+    readonly IObservable<GestureArgs> recognitionStarted;
+    readonly IObservable<TapppedGestureArgs> tapped;
 
     public ReactiveGestureRecognizer()
         : this(new GestureRecognizer())
@@ -104,9 +110,31 @@ public class ReactiveGestureRecognizer
                         h => (source, cumulativeDelta, headRay) => h(new CumulativeDeltaGestureArgs { Source = source, CumulativeDelta = cumulativeDelta, HeadRay = headRay }),
                         h => recognizer.ManipulationUpdatedEvent += h, h => recognizer.ManipulationUpdatedEvent -= h);
 
-        // TODO: add the other event handlers
+        navigationCanceled = Observable.FromEvent<GestureRecognizer.NavigationCanceledEventDelegate, NormalizedOffsetGestureArgs>(
+                        h => (source, normalizedOffset, headRay) => h(new NormalizedOffsetGestureArgs { Source = source, NormalizedOffset = normalizedOffset, HeadRay = headRay }),
+                        h => recognizer.NavigationCanceledEvent += h, h => recognizer.NavigationCanceledEvent -= h);
 
-        gestureTapped = Observable.FromEvent<GestureRecognizer.TappedEventDelegate, TapppedGestureArgs>(
+        navigationCompleted = Observable.FromEvent<GestureRecognizer.NavigationCompletedEventDelegate, NormalizedOffsetGestureArgs>(
+                        h => (source, normalizedOffset, headRay) => h(new NormalizedOffsetGestureArgs { Source = source, NormalizedOffset = normalizedOffset, HeadRay = headRay }),
+                        h => recognizer.NavigationCompletedEvent += h, h => recognizer.NavigationCompletedEvent -= h);
+
+        navigationStarted = Observable.FromEvent<GestureRecognizer.NavigationStartedEventDelegate, NormalizedOffsetGestureArgs>(
+                        h => (source, normalizedOffset, headRay) => h(new NormalizedOffsetGestureArgs { Source = source, NormalizedOffset = normalizedOffset, HeadRay = headRay }),
+                        h => recognizer.NavigationStartedEvent += h, h => recognizer.NavigationStartedEvent -= h);
+
+        navigationUpdated = Observable.FromEvent<GestureRecognizer.NavigationUpdatedEventDelegate, NormalizedOffsetGestureArgs>(
+                        h => (source, normalizedOffset, headRay) => h(new NormalizedOffsetGestureArgs { Source = source, NormalizedOffset = normalizedOffset, HeadRay = headRay }),
+                        h => recognizer.NavigationUpdatedEvent += h, h => recognizer.NavigationUpdatedEvent -= h);
+
+        recognitionEnded = Observable.FromEvent<GestureRecognizer.RecognitionEndedEventDelegate, GestureArgs>(
+                        h => (source, headRay) => h(new GestureArgs { Source = source, HeadRay = headRay }),
+                        h => recognizer.RecognitionEndedEvent += h, h => recognizer.RecognitionEndedEvent -= h);
+
+        recognitionStarted = Observable.FromEvent<GestureRecognizer.RecognitionStartedEventDelegate, GestureArgs>(
+                        h => (source, headRay) => h(new GestureArgs { Source = source, HeadRay = headRay }),
+                        h => recognizer.RecognitionStartedEvent += h, h => recognizer.RecognitionStartedEvent -= h);
+
+        tapped = Observable.FromEvent<GestureRecognizer.TappedEventDelegate, TapppedGestureArgs>(
                         h => (source, tapCount, headRay) => h(new TapppedGestureArgs { Source = source, TapCount = tapCount, HeadRay = headRay }),
                         h => recognizer.TappedEvent += h, h => recognizer.TappedEvent -= h);
     }
@@ -174,17 +202,6 @@ public class ReactiveGestureRecognizer
         });
     }
 
-    public IObservable<TapppedGestureArgs> TappedAsObservable()
-    {
-        return Observable.Create<TapppedGestureArgs>(observer =>
-        {
-            return new CompositeDisposable(new IDisposable[] {
-                gestureTapped.Subscribe(observer.OnNext),
-                gestureError.Subscribe(error => observer.OnError(new GestureRecognitionException(error.Error, error.HResult))),
-            });
-        });
-    }
-
     public IObservable<CumulativeDeltaGestureArgs> ManipulationCanceledAsObservable()
     {
         return Observable.Create<CumulativeDeltaGestureArgs>(observer =>
@@ -224,6 +241,83 @@ public class ReactiveGestureRecognizer
         {
             return new CompositeDisposable(new IDisposable[] {
                 manipulationUpdated.Subscribe(observer.OnNext),
+                gestureError.Subscribe(error => observer.OnError(new GestureRecognitionException(error.Error, error.HResult))),
+            });
+        });
+    }
+
+    public IObservable<NormalizedOffsetGestureArgs> NavigationCanceledAsObservable()
+    {
+        return Observable.Create<NormalizedOffsetGestureArgs>(observer =>
+        {
+            return new CompositeDisposable(new IDisposable[] {
+                navigationCanceled.Subscribe(observer.OnNext),
+                gestureError.Subscribe(error => observer.OnError(new GestureRecognitionException(error.Error, error.HResult))),
+            });
+        });
+    }
+
+    public IObservable<NormalizedOffsetGestureArgs> NavigationCompletedAsObservable()
+    {
+        return Observable.Create<NormalizedOffsetGestureArgs>(observer =>
+        {
+            return new CompositeDisposable(new IDisposable[] {
+                navigationCompleted.Subscribe(observer.OnNext),
+                gestureError.Subscribe(error => observer.OnError(new GestureRecognitionException(error.Error, error.HResult))),
+            });
+        });
+    }
+
+    public IObservable<NormalizedOffsetGestureArgs> NavigationStartedAsObservable()
+    {
+        return Observable.Create<NormalizedOffsetGestureArgs>(observer =>
+        {
+            return new CompositeDisposable(new IDisposable[] {
+                navigationStarted.Subscribe(observer.OnNext),
+                gestureError.Subscribe(error => observer.OnError(new GestureRecognitionException(error.Error, error.HResult))),
+            });
+        });
+    }
+
+    public IObservable<NormalizedOffsetGestureArgs> NavigationUpdatedAsObservable()
+    {
+        return Observable.Create<NormalizedOffsetGestureArgs>(observer =>
+        {
+            return new CompositeDisposable(new IDisposable[] {
+                navigationUpdated.Subscribe(observer.OnNext),
+                gestureError.Subscribe(error => observer.OnError(new GestureRecognitionException(error.Error, error.HResult))),
+            });
+        });
+    }
+
+    public IObservable<GestureArgs> RecognitionEndedAsObservable()
+    {
+        return Observable.Create<GestureArgs>(observer =>
+        {
+            return new CompositeDisposable(new IDisposable[] {
+                recognitionEnded.Subscribe(observer.OnNext),
+                gestureError.Subscribe(error => observer.OnError(new GestureRecognitionException(error.Error, error.HResult))),
+            });
+        });
+    }
+
+    public IObservable<GestureArgs> RecognitionStartedAsObservable()
+    {
+        return Observable.Create<GestureArgs>(observer =>
+        {
+            return new CompositeDisposable(new IDisposable[] {
+                recognitionStarted.Subscribe(observer.OnNext),
+                gestureError.Subscribe(error => observer.OnError(new GestureRecognitionException(error.Error, error.HResult))),
+            });
+        });
+    }
+
+    public IObservable<TapppedGestureArgs> TappedAsObservable()
+    {
+        return Observable.Create<TapppedGestureArgs>(observer =>
+        {
+            return new CompositeDisposable(new IDisposable[] {
+                tapped.Subscribe(observer.OnNext),
                 gestureError.Subscribe(error => observer.OnError(new GestureRecognitionException(error.Error, error.HResult))),
             });
         });
